@@ -249,9 +249,9 @@ impl JobDeclarator {
                 bitcoin::consensus::deserialize(&tx);
             match transaction {
                 Ok(tx) => {
-                    let id: U256 = tx.compute_txid().to_raw_hash().to_byte_array().into();
+                    let w_tx_id: U256 = tx.compute_wtxid().to_raw_hash().to_byte_array().into();
                     tx_list.push(tx);
-                    tx_ids.push(id);
+                    tx_ids.push(w_tx_id);
                 }
                 Err(_) => {
                     error!("Failed to deserailize transaction");
