@@ -438,7 +438,7 @@ impl IsServer<'static> for Downstream {
     }
 
     fn handle_suggest_difficulty(&mut self, _: &sv1_api::client_to_server::SuggestDifficulty) {
-        todo!()
+        println!("Received Suggest Diff");
     }
 
     /// Handle the response to a `mining.subscribe` message received from the client.
