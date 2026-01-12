@@ -532,6 +532,7 @@ impl IsServer<'static> for Downstream {
                 self.extranonce1.clone(),
                 self.version_rolling_mask.clone(),
             ) {
+                let mut is_share_accepted = false;
                 // Only forward upstream if the share meets the latest difficulty
                 if let Some(latest_difficulty) = self.difficulty_mgmt.current_difficulties.back() {
                     if met_difficulty == *latest_difficulty {
@@ -559,6 +560,7 @@ impl IsServer<'static> for Downstream {
                             None,
                         );
                         self.share_monitor.insert_share(share);
+                        is_share_accepted = true;
                     } else {
                         // met_difficulty is not latest difficulty, so we mark it as rejected
                         let share = ShareInfo::new(
@@ -570,12 +572,19 @@ impl IsServer<'static> for Downstream {
                         self.share_monitor.insert_share(share);
                     }
                 }
-                self.stats_sender.update_accepted_shares(self.connection_id);
-                info!(
-                    "Share for Job {} and difficulty {} is accepted",
-                    request.job_id, met_difficulty
-                );
-                true
+                if is_share_accepted {
+                    self.stats_sender.update_accepted_shares(self.connection_id);
+                    info!(
+                        "Share for Job {} and difficulty {} is accepted",
+                        request.job_id, met_difficulty
+                    );
+                    true
+                }
+                else {
+                error!("met_difficulty is not latest difficulty");
+                self.stats_sender.update_rejected_shares(self.connection_id);
+                false
+                }
             } else {
                 let share = ShareInfo::new(
                     request.user_name.clone(),
