@@ -144,10 +144,10 @@ async fn start_update(
         tokio::time::sleep(std::time::Duration::from_secs(crate::Configuration::delay())).await;
         loop {
             let share_count = crate::translator::utils::get_share_count(connection_id);
-            let sleep_duration = if share_count >= *crate::SHARE_PER_MIN * 3.0
-                || share_count <= *crate::SHARE_PER_MIN / 3.0
+            let has_received = crate::translator::utils::has_received_share(connection_id);
+            let sleep_duration = if has_received && (share_count >= *crate::SHARE_PER_MIN * 3.0
+                || share_count <= *crate::SHARE_PER_MIN / 3.0)
             {
-                // TODO: this should only apply when after the first share has been received
                 std::time::Duration::from_millis(crate::Configuration::adjustment_interval())
             } else {
                 std::time::Duration::from_millis(crate::Configuration::adjustment_interval())

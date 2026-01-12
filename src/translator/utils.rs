@@ -255,6 +255,17 @@ pub fn get_share_count(connection_id: u32) -> f32 {
     share_counts
 }
 
+// Check if a share has been received for the connection_id
+pub fn has_received_share(connection_id: u32) -> bool {
+    SHARE_COUNTS
+        .safe_lock(|share_counts| share_counts.contains_key(&connection_id))
+        .unwrap_or_else(|_| {
+            error!("Failed to lock SHARE_COUNTS");
+            ProxyState::update_downstream_state(DownstreamType::TranslatorDownstream);
+            false
+        })
+}
+
 // /// currently the pool only supports 16 bytes exactly for its channels
 // /// to use but that may change
 // pub fn proxy_extranonce1_len(
