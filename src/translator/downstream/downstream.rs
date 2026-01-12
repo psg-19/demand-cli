@@ -437,6 +437,10 @@ impl IsServer<'static> for Downstream {
         )
     }
 
+    fn handle_suggest_difficulty(&mut self, _: &sv1_api::client_to_server::SuggestDifficulty) {
+        println!("Received Suggest Diff");
+    }
+
     /// Handle the response to a `mining.subscribe` message received from the client.
     /// The subscription messages are erroneous and just used to conform the SV1 protocol spec.
     /// Because no one unsubscribed in practice, they just unplug their machine.
