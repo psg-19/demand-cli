@@ -10,6 +10,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Get version from tag
+        id: get_version
+        run: |
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            echo "VERSION=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          else
+            VERSION=$(git describe --tags --abbrev=0)
+            echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          fi
+          echo "Resolved version: ${{ github.ref_type == 'tag' && github.ref_name || '$(git describe --tags --abbrev=0)' }}"
+
+      - name: Print resolved version
+        run: echo "Will tag ECR image with version -> ${{ steps.get_version.outputs.VERSION }}"
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -27,5 +41,6 @@ jobs:
           command: up
           stack-name: dmnd-tech-org/dmnd-client-image/dmnd-client-image
           work-dir: deployment/ecrImage/
+          config: version=${{ steps.get_version.outputs.VERSION }}
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
