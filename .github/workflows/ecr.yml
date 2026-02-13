@@ -21,11 +21,22 @@ jobs:
         run: npm install
         working-directory: deployment/ecrImage/
 
+      - name: Get version from tag
+        id: get_version
+        run: |
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            echo "VERSION=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          else
+            VERSION=$(git describe --tags --abbrev=0)
+            echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          fi
+
       - name: Run Pulumi Up
         uses: pulumi/actions@v6
         with:
           command: up
           stack-name: dmnd-tech-org/dmnd-client-image/dmnd-client-image
           work-dir: deployment/ecrImage/
+          config: version=${{ steps.get_version.outputs.VERSION }}
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
